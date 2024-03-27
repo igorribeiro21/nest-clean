@@ -8,21 +8,21 @@ import { QuestionBestAnswerChosenEvent } from './events/question-best-answer-cho
 
 export interface QuestionProps {
 	authorId: UniqueEntityID;
-	bestAnswerID?: UniqueEntityID;
+	bestAnswerId?: UniqueEntityID | null;
 	title: string;
 	content: string;
 	slug: Slug;
 	attachments: QuestionAttachmentList;
 	createdAt: Date;
-	updatedAt?: Date;
+	updatedAt?: Date | null;
 }
 export class Question extends AggregateRoot<QuestionProps> {
     get authorId() {
         return this.props.authorId;
     }
 
-    get bestAnswerID() {
-        return this.props.bestAnswerID;
+    get bestAnswerId() {
+        return this.props.bestAnswerId;
     }
 	
     get title() {
@@ -79,16 +79,12 @@ export class Question extends AggregateRoot<QuestionProps> {
         this.touch();
     }
 
-    set bestAnswerID(bestAnswerID: UniqueEntityID | undefined) {
-        if(bestAnswerID === undefined) {
-            return;
+    set bestAnswerId(bestAnswerId: UniqueEntityID | undefined | null) {
+        if(bestAnswerId && bestAnswerId !== this.props.bestAnswerId) {
+            this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, bestAnswerId));
         }
 
-        if(this.props.bestAnswerID === undefined || !this.props.bestAnswerID.equals(bestAnswerID)) {
-            this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, bestAnswerID));
-        }
-
-        this.props.bestAnswerID = bestAnswerID;
+        this.props.bestAnswerId = bestAnswerId;
         this.touch();
     }
 
