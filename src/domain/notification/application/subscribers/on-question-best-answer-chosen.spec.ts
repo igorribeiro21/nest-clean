@@ -40,7 +40,7 @@ describe('On Question Best Answer Chosen',() => {
         inMemoryQuestionsRepository.create(question);		
         await inMemoryAnswersRepository.create(answer);
 
-        question.bestAnswerID = answer.id;
+        question.bestAnswerId = answer.id;
 
         inMemoryQuestionsRepository.save(question);
 
