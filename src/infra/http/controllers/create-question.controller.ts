@@ -1,5 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '@/infra/auth/jwt-auth.guard';
+import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
 import { CurrentUser } from '@/infra/auth/current-user.decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
 import { z } from 'zod';
@@ -16,7 +15,6 @@ const bodyValidationPipe = new ZodValidationPipe(createQuestionBodySchema);
 type CreateQuestionBodySchema = z.infer<typeof createQuestionBodySchema>;
 
 @Controller('/questions')
-@UseGuards(JwtAuthGuard)
 export class CreateQuestionController {
     constructor(
         private createQuestion: CreateQuestionUseCase
@@ -29,11 +27,15 @@ export class CreateQuestionController {
         const { title, content } = body;
         const { sub: userId } = user;
 
-        await this.createQuestion.execute({
+        const { isLeft } = await this.createQuestion.execute({
             title,
             content,
             authorId: userId,
             attachmentsIds: []
         });
+
+        if (isLeft()) {
+            throw new BadRequestException();
+        }
     }
 }
