@@ -14,6 +14,8 @@ import { QuestionCommentsRepository } from '@/domain/forum/application/repositor
 import { AnswerAttachmentsRepository } from '@/domain/forum/application/repositories/answer-attachments-repository';
 import { AnswerCommentsRepository } from '@/domain/forum/application/repositories/answer-comment-repository';
 import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
+import { AttachmentsRepository } from '@/domain/forum/application/repositories/attachments-repository';
+import { PrismaAttachmentsRepository } from './prisma/repositories/prisma-attachments-repository';
 
 @Module({
     providers: [
@@ -45,7 +47,11 @@ import { AnswersRepository } from '@/domain/forum/application/repositories/answe
         {
             provide: AnswersRepository,
             useClass: PrismaAnswerRepository
-        }
+        },
+        {
+            provide: AttachmentsRepository,
+            useClass: PrismaAttachmentsRepository,
+        },
     ],
     exports: [
         PrismaService,
@@ -56,6 +62,7 @@ import { AnswersRepository } from '@/domain/forum/application/repositories/answe
         AnswerCommentsRepository,
         AnswersRepository,
         StudentsRepository,
+        AttachmentsRepository,
     ],
 })
 export class DatabaseModule {}
