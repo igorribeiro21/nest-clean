@@ -12,7 +12,7 @@ import { PrismaStudentsRepository } from './prisma/repositories/prisma-students-
 import { QuestionAttachmentsRepository } from '@/domain/forum/application/repositories/question-attachments-repository';
 import { QuestionCommentsRepository } from '@/domain/forum/application/repositories/question-comments-repository';
 import { AnswerAttachmentsRepository } from '@/domain/forum/application/repositories/answer-attachments-repository';
-import { AnswerCommentsRepository } from '@/domain/forum/application/repositories/answer-comment-repository';
+import { AnswerCommentsRepository } from '@/domain/forum/application/repositories/answer-comments-repository';
 import { AnswersRepository } from '@/domain/forum/application/repositories/answers-repository';
 import { AttachmentsRepository } from '@/domain/forum/application/repositories/attachments-repository';
 import { PrismaAttachmentsRepository } from './prisma/repositories/prisma-attachments-repository';
