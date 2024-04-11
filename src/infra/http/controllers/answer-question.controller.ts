@@ -1,41 +1,46 @@
-import { BadRequestException, Body, Controller, Param, Post } from '@nestjs/common';
-import { CurrentUser } from '@/infra/auth/current-user.decorator';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    Param,
+    Post,
+} from '@nestjs/common';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
 import { z } from 'zod';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation';
 import { AnswerQuestionUseCase } from '@/domain/forum/application/use-cases/answer-question';
-
+import { ZodValidationPipe } from '../pipes/zod-validation';
+import { CurrentUser } from '@/infra/auth/current-user.decorator';
+  
 const answerQuestionBodySchema = z.object({
-    content: z.string()
+    content: z.string(),
+    attachments: z.array(z.string().uuid()),
 });
-
+  
 const bodyValidationPipe = new ZodValidationPipe(answerQuestionBodySchema);
-
-type AnswerQuestionBodySchema = z.infer<typeof answerQuestionBodySchema>;
-
-@Controller('/questions/:questionId/answers')
+  
+  type AnswerQuestionBodySchema = z.infer<typeof answerQuestionBodySchema>
+  
+  @Controller('/questions/:questionId/answers')
 export class AnswerQuestionController {
-    constructor(
-        private answerQuestion: AnswerQuestionUseCase
-    ) { }
-
+    constructor(private answerQuestion: AnswerQuestionUseCase) {}
+  
     @Post()
     async handle(
-        @Body(bodyValidationPipe) body: AnswerQuestionBodySchema,
-        @CurrentUser() user: UserPayload,
-        @Param('questionId')  questionId: string
+      @Body(bodyValidationPipe) body: AnswerQuestionBodySchema,
+      @CurrentUser() user: UserPayload,
+      @Param('questionId') questionId: string,
     ) {
-        const { content } = body;
-        const { sub: userId } = user;
-
-        const { isLeft } = await this.answerQuestion.execute({
-            questionId,
+        const { content, attachments } = body;
+        const userId = user.sub;
+  
+        const result = await this.answerQuestion.execute({
             content,
+            questionId,
             authorId: userId,
-            attachmentsIds: []
+            attachmentsIds: attachments,
         });
-
-        if (isLeft()) {
+  
+        if (result.isLeft()) {
             throw new BadRequestException();
         }
     }
