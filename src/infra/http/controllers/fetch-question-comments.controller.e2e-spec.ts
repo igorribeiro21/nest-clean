@@ -13,7 +13,7 @@ describe('Fetch question comments (E2E)', () => {
     let studentFactory: StudentFactory;
     let questionFactory: QuestionFactory;
     let questionCommentFactory: QuestionCommentFactory;
-let jwt: JwtService;
+    let jwt: JwtService;
 
     beforeAll(async () => {
         const moduleRef = await Test.createTestingModule({

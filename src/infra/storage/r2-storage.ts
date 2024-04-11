@@ -2,19 +2,19 @@ import {
     UploadParams,
     Uploader,
 } from '@/domain/forum/application/storage/uploader';
-  
+
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { EnvService } from '../env/env.service';
 import { randomUUID } from 'node:crypto';
-  
-  @Injectable()
+
+@Injectable()
 export class R2Storage implements Uploader {
     private client: S3Client;
-  
+
     constructor(private envService: EnvService) {
         const accountId = envService.get('CLOUDFLARE_ACCOUNT_ID');
-  
+
         this.client = new S3Client({
             endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
             region: 'auto',
@@ -24,7 +24,7 @@ export class R2Storage implements Uploader {
             },
         });
     }
-  
+
     async upload({
         fileName,
         fileType,
@@ -32,7 +32,7 @@ export class R2Storage implements Uploader {
     }: UploadParams): Promise<{ url: string }> {
         const uploadId = randomUUID();
         const uniqueFileName = `${uploadId}-${fileName}`;
-  
+
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.envService.get('AWS_BUCKET_NAME'),
@@ -41,7 +41,7 @@ export class R2Storage implements Uploader {
                 Body: body,
             }),
         );
-  
+
         return {
             url: uniqueFileName,
         };

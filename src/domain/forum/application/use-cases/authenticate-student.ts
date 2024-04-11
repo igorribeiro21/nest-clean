@@ -6,24 +6,26 @@ import { Encrypter } from '../cryptography/encrypter';
 import { WrongCredentialsError } from './errors/wrong-credentials-error';
 
 interface AuthenticateStudentUseCaseRequest {
-    email: string;
-    password: string;
+  email: string
+  password: string
 }
 
 type AuthenticateStudentUseCaseResponse = Either<
-    WrongCredentialsError,{
+  WrongCredentialsError,
+  {
     accessToken: string
-}>
+  }
+>
 
 @Injectable()
 export class AuthenticateStudentUseCase {
     constructor(
-		private studentsRepository: StudentsRepository,
-        private hashComparer: HashComparer,
-        private encrypter: Encrypter,
+    private studentsRepository: StudentsRepository,
+    private hashComparer: HashComparer,
+    private encrypter: Encrypter,
     ) {}
 
-    async execute({ 
+    async execute({
         email,
         password,
     }: AuthenticateStudentUseCaseRequest): Promise<AuthenticateStudentUseCaseResponse> {
@@ -33,16 +35,21 @@ export class AuthenticateStudentUseCase {
             return left(new WrongCredentialsError());
         }
 
-        const isPasswordValid = await this.hashComparer.compare(password,student.password);
+        const isPasswordValid = await this.hashComparer.compare(
+            password,
+            student.password,
+        );
 
-        if(!isPasswordValid) {
+        if (!isPasswordValid) {
             return left(new WrongCredentialsError());
         }
 
-        const accessToken = await this.encrypter.encrypt({ sub: student.id.toString() });
+        const accessToken = await this.encrypter.encrypt({
+            sub: student.id.toString(),
+        });
 
         return right({
-            accessToken
+            accessToken,
         });
     }
 }

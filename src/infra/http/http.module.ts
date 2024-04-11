@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CreateAccountController } from './controllers/create-account.controller';
+
 import { AuthenticateController } from './controllers/authenticate.controller';
+import { CreateAccountController } from './controllers/create-account.controller';
 import { CreateQuestionController } from './controllers/create-question.controller';
 import { FetchRecentQuestionsController } from './controllers/fetch-recent-questions.controller';
 import { DatabaseModule } from '../database/database.module';
@@ -64,7 +65,7 @@ import { UploadAndCreateAttachmentUseCase } from '@/domain/forum/application/use
         FetchAnswerCommentsController,
         UploadAttachmentController,
     ],
-    providers:[        
+    providers: [
         CreateQuestionUseCase,
         FetchRecentQuestionsUseCase,
         RegisterStudentUseCase,
@@ -84,6 +85,6 @@ import { UploadAndCreateAttachmentUseCase } from '@/domain/forum/application/use
         FetchQuestionCommentsUseCase,
         FetchAnswerCommentsUseCase,
         UploadAndCreateAttachmentUseCase,
-    ]
+    ],
 })
-export class HttpModule{}
+export class HttpModule {}

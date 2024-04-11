@@ -1,8 +1,15 @@
-import { BadRequestException, Body, Controller, HttpCode, Param, Put } from '@nestjs/common';
-import { CurrentUser } from '@/infra/auth/current-user.decorator';
+import {
+    BadRequestException,
+    Body,
+    Controller,
+    HttpCode,
+    Param,
+    Put,
+} from '@nestjs/common';
+import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
+import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
 import { z } from 'zod';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation';
 import { EditQuestionUseCase } from '@/domain/forum/application/use-cases/edit-question';
 
 const editQuestionBodySchema = z.object({
@@ -13,33 +20,31 @@ const editQuestionBodySchema = z.object({
 
 const bodyValidationPipe = new ZodValidationPipe(editQuestionBodySchema);
 
-type EditQuestionBodySchema = z.infer<typeof editQuestionBodySchema>;
+type EditQuestionBodySchema = z.infer<typeof editQuestionBodySchema>
 
-@Controller('/questions')
+@Controller('/questions/:id')
 export class EditQuestionController {
-    constructor(
-        private editQuestion: EditQuestionUseCase
-    ) { }
+    constructor(private editQuestion: EditQuestionUseCase) {}
 
-    @Put('/:id')
-    @HttpCode(204)    
+  @Put()
+  @HttpCode(204)
     async handle(
-        @Body(bodyValidationPipe) body: EditQuestionBodySchema,
-        @CurrentUser() user: UserPayload,
-        @Param('id') questionId: string    
+    @Body(bodyValidationPipe) body: EditQuestionBodySchema,
+    @CurrentUser() user: UserPayload,
+    @Param('id') questionId: string,
     ) {
         const { title, content, attachments } = body;
-        const { sub: userId } = user;
+        const userId = user.sub;
 
-        const { isLeft } = await this.editQuestion.execute({
+        const result = await this.editQuestion.execute({
             title,
             content,
             authorId: userId,
             attachmentsIds: attachments,
-            questionId
+            questionId,
         });
 
-        if (isLeft()) {
+        if (result.isLeft()) {
             throw new BadRequestException();
         }
     }
