@@ -14,7 +14,7 @@ implements QuestionCommentsRepository
     constructor(private prisma: PrismaService) {}
 
     async findById(id: string): Promise<QuestionComment | null> {
-        const questionComment = await this.prisma.comment.findUnique({
+        const questionComment = await this.prisma.coment.findUnique({
             where: {
                 id,
             },
@@ -31,7 +31,7 @@ implements QuestionCommentsRepository
         questionId: string,
         { page }: PaginationParams,
     ): Promise<QuestionComment[]> {
-        const questionComments = await this.prisma.comment.findMany({
+        const questionComments = await this.prisma.coment.findMany({
             where: {
                 questionId,
             },
@@ -49,7 +49,7 @@ implements QuestionCommentsRepository
         questionId: string,
         { page }: PaginationParams,
     ): Promise<CommentWithAuthor[]> {
-        const questionComments = await this.prisma.comment.findMany({
+        const questionComments = await this.prisma.coment.findMany({
             where: {
                 questionId,
             },
@@ -69,13 +69,13 @@ implements QuestionCommentsRepository
     async create(questionComment: QuestionComment): Promise<void> {
         const data = PrismaQuestionCommentMapper.toPrisma(questionComment);
 
-        await this.prisma.comment.create({
+        await this.prisma.coment.create({
             data,
         });
     }
 
     async delete(questionComment: QuestionComment): Promise<void> {
-        await this.prisma.comment.delete({
+        await this.prisma.coment.delete({
             where: {
                 id: questionComment.id.toString(),
             },

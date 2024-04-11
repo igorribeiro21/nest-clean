@@ -51,7 +51,7 @@ describe('Comment on question (E2E)', () => {
 
         expect(response.statusCode).toBe(201);
 
-        const commentOnDatabase = await prisma.comment.findFirst({
+        const commentOnDatabase = await prisma.coment.findFirst({
             where: {
                 content: 'New comment',
             },
