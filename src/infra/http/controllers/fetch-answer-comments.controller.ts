@@ -5,10 +5,10 @@ import {
     Param,
     Query,
 } from '@nestjs/common';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
 import { z } from 'zod';
 import { FetchAnswerCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-answer-comments';
 import { CommentWithAuthorPresenter } from '../presenters/comment-with-author-presenter';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 
 const pageQueryParamSchema = z
     .string()
@@ -23,23 +23,27 @@ type PageQueryParamSchema = z.infer<typeof pageQueryParamSchema>
 
 @Controller('/answers/:answerId/comments')
 export class FetchAnswerCommentsController {
-    constructor(private fetchAnswerComments: FetchAnswerCommentsUseCase) {}
+    constructor(private fetchAnswerComments: FetchAnswerCommentsUseCase) { }
 
-  @Get()
+    @Get()
     async handle(
-    @Query('page', queryValidationPipe) page: PageQueryParamSchema,
-    @Param('answerId') answerId: string,
+        @Query('page', queryValidationPipe) page: PageQueryParamSchema,
+        @Param('answerId') answerId: string,
     ) {
-        const result = await this.fetchAnswerComments.execute({
+        const { isLeft, value } = await this.fetchAnswerComments.execute({
             page,
             answerId,
         });
 
-        if (result.isLeft()) {
+        if (isLeft()) {
             throw new BadRequestException();
         }
 
-        const comments = result.value.comments;
+        if(!value?.comments) {
+            throw new BadRequestException();
+        }
+
+        const comments = value.comments;
 
         return { comments: comments.map(CommentWithAuthorPresenter.toHTTP) };
     }

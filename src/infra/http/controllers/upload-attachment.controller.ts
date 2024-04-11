@@ -35,24 +35,35 @@ export class UploadAttachmentController {
     )
         file: Express.Multer.File,
     ) {
-        const result = await this.uploadAndCreateAttachment.execute({
+        const { isLeft, value } = await this.uploadAndCreateAttachment.execute({
             fileName: file.originalname,
             fileType: file.mimetype,
             body: file.buffer,
         });
 
-        if (result.isLeft()) {
-            const error = result.value;
+        if (isLeft()) {
+            let error = value;
 
             switch (error.constructor) {
             case InvalidAttachmentTypeError:
-                throw new BadRequestException(error.message);
+                if(value instanceof InvalidAttachmentTypeError) {
+                    error = value;
+                    throw new BadRequestException(error.message);
+                }
+                break;
             default:
-                throw new BadRequestException(error.message);
+                if(value instanceof Error) {
+                    error = value;
+                    throw new BadRequestException(error.message);
+                }
             }
         }
 
-        const { attachment } = result.value;
+        if(value instanceof InvalidAttachmentTypeError) {
+            throw new BadRequestException(value.message);
+        }
+
+        const { attachment } = value;
 
         return {
             attachmentId: attachment.id.toString(),

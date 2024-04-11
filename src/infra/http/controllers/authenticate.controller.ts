@@ -1,51 +1,56 @@
-import {
-    BadRequestException,
-    Body,
-    Controller,
-    Post,
-    UnauthorizedException,
-    UsePipes,
-} from '@nestjs/common';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation-pipe';
+import { BadRequestException, UnauthorizedException, UsePipes } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { z } from 'zod';
 import { AuthenticateStudentUseCase } from '@/domain/forum/application/use-cases/authenticate-student';
 import { WrongCredentialsError } from '@/domain/forum/application/use-cases/errors/wrong-credentials-error';
 import { Public } from '@/infra/auth/public';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 
 const authenticateBodySchema = z.object({
     email: z.string().email(),
-    password: z.string(),
+    password: z.string()
 });
 
-type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>
+type AuthenticateBodySchema = z.infer<typeof authenticateBodySchema>;
 
 @Controller('/sessions')
 @Public()
 export class AuthenticateController {
-    constructor(private authenticateStudent: AuthenticateStudentUseCase) {}
+    constructor(
+        private authenticateStudent: AuthenticateStudentUseCase,
+    ) { }
 
-  @Post()
-  @UsePipes(new ZodValidationPipe(authenticateBodySchema))
+    @Post()
+    @UsePipes(new ZodValidationPipe(authenticateBodySchema))
     async handle(@Body() body: AuthenticateBodySchema) {
         const { email, password } = body;
 
-        const result = await this.authenticateStudent.execute({
+        const { isLeft, value } = await this.authenticateStudent.execute({
             email,
-            password,
+            password
         });
 
-        if (result.isLeft()) {
-            const error = result.value;
+        if (isLeft()) {
+            const error = value;
 
             switch (error.constructor) {
-            case WrongCredentialsError:
-                throw new UnauthorizedException(error.message);
-            default:
-                throw new BadRequestException(error.message);
+            case WrongCredentialsError: 
+                if(error instanceof WrongCredentialsError) {
+                    throw new UnauthorizedException(error.message);
+                }
+                break;
+            default: 
+                if(error instanceof Error) {
+                    throw new BadRequestException(error.message);
+                }
             }
         }
 
-        const { accessToken } = result.value;
+        if (value instanceof WrongCredentialsError) {
+            throw new WrongCredentialsError();
+        }
+
+        const { accessToken } = value;
 
         return {
             access_token: accessToken,
