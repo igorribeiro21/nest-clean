@@ -1,10 +1,10 @@
 import {  BadRequestException, ConflictException, UsePipes } from '@nestjs/common';
 import { Body, Controller, Post } from '@nestjs/common';
 import { z } from 'zod';
-import { ZodValidationPipe } from '@/infra/http/pipes/zod-validation';
 import { RegisterStudentUseCase } from '@/domain/forum/application/use-cases/register-student';
-import { StudentAlreadyExistsError } from '@/domain/forum/application/use-cases/errors/student-already-exists.error';
 import { Public } from '@/infra/auth/public';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
+import { StudentAlreadyExistsError } from '@/domain/forum/application/use-cases/errors/student-already-exists-error';
 
 const createAccountBodySchema = z.object({
     name: z.string(),

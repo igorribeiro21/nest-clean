@@ -1,28 +1,32 @@
-import { BadRequestException, Controller, Delete, HttpCode, Param } from '@nestjs/common';
-import { CurrentUser } from '@/infra/auth/current-user.decorator';
+import {
+    BadRequestException,
+    Controller,
+    Delete,
+    HttpCode,
+    Param,
+} from '@nestjs/common';
+import { CurrentUser } from '@/infra/auth/current-user-decorator';
 import { UserPayload } from '@/infra/auth/jwt.strategy';
 import { DeleteQuestionUseCase } from '@/domain/forum/application/use-cases/delete-question';
 
-@Controller('/questions')
+@Controller('/questions/:id')
 export class DeleteQuestionController {
-    constructor(
-        private deleteQuestion: DeleteQuestionUseCase
-    ) { }
+    constructor(private deleteQuestion: DeleteQuestionUseCase) {}
 
-    @Delete('/:id')
-    @HttpCode(204)    
+  @Delete()
+  @HttpCode(204)
     async handle(
-        @CurrentUser() user: UserPayload,
-        @Param('id') questionId: string    
+    @CurrentUser() user: UserPayload,
+    @Param('id') questionId: string,
     ) {
-        const { sub: userId } = user;
+        const userId = user.sub;
 
-        const { isLeft } = await this.deleteQuestion.execute({
+        const result = await this.deleteQuestion.execute({
             questionId,
-            authorId: userId
+            authorId: userId,
         });
 
-        if (isLeft()) {
+        if (result.isLeft()) {
             throw new BadRequestException();
         }
     }

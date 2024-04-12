@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { z } from 'zod';
 import { FetchAnswerCommentsUseCase } from '@/domain/forum/application/use-cases/fetch-answer-comments';
-import { CommentPresenter } from '../presenters/comment-presenter';
-import { ZodValidationPipe } from '../pipes/zod-validation';
+import { CommentWithAuthorPresenter } from '../presenters/comment-with-author-presenter';
+import { ZodValidationPipe } from '../pipes/zod-validation-pipe';
 
 const pageQueryParamSchema = z
     .string()
@@ -39,12 +39,12 @@ export class FetchAnswerCommentsController {
             throw new BadRequestException();
         }
 
-        if(!value?.answerComments) {
+        if(!value?.comments) {
             throw new BadRequestException();
         }
 
-        const answerComments = value.answerComments;
+        const comments = value.comments;
 
-        return { comments: answerComments.map(CommentPresenter.toHTTP) };
+        return { comments: comments.map(CommentWithAuthorPresenter.toHTTP) };
     }
 }

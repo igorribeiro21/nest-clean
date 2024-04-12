@@ -5,34 +5,35 @@ import { NotAllowedError } from '@/core/errors/errors/not-allowed-error';
 import { Injectable } from '@nestjs/common';
 
 interface DeleteQuestionUseCaseRequest {
-    authorId: string;
-    questionId: string;
+  authorId: string
+  questionId: string
 }
 
-type DeleteQuestionUseCaseResponse = Either<ResourceNotFoundError | NotAllowedError, object>
+type DeleteQuestionUseCaseResponse = Either<
+  ResourceNotFoundError | NotAllowedError,
+  null
+>
 
 @Injectable()
 export class DeleteQuestionUseCase {
-    constructor(
-		private questionsRepository: QuestionsRepository
-    ) {}
+    constructor(private questionsRepository: QuestionsRepository) {}
 
-    async execute({ 
+    async execute({
+        questionId,
         authorId,
-        questionId
     }: DeleteQuestionUseCaseRequest): Promise<DeleteQuestionUseCaseResponse> {
         const question = await this.questionsRepository.findById(questionId);
 
-        if(!question) {
+        if (!question) {
             return left(new ResourceNotFoundError());
         }
 
-        if(authorId !== question.authorId.toString()) {
+        if (authorId !== question.authorId.toString()) {
             return left(new NotAllowedError());
         }
 
         await this.questionsRepository.delete(question);
 
-        return right({});
+        return right(null);
     }
 }
