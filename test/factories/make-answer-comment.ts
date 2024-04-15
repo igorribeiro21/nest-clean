@@ -27,7 +27,7 @@ export class AnswerCommentFactory {
     async makePrismaAnswerComment(data: Partial<AnswerCommentProps> = {}): Promise<AnswerComment> {
         const answerComment = makeAnswerComment(data);
 
-        await this.prisma.coment.create({
+        await this.prisma.comment.create({
             data: PrismaAnswerCommentMapper.toPrisma(answerComment)
         });
         
